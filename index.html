@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mi rutina</title>
+  <link rel="manifest" href="manifest.json">  
+  <meta name="theme-color" content="#1e6fd9">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <style>
+    :root {
+      --acento: #1e6fd9;
+      --verde: seagreen;
+      --fondo: #eef4fc;
+      --tarjeta: #ffffff;
+      --texto: #12263f;
+      --gris: #d9e4f2;
+      --progreso: #d400b8;
+    }
+
+    body {
+      font-family: system-ui, sans-serif;
+      background: var(--fondo);
+      color: var(--texto);
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 16px;
+    }
+
+    h1 {
+      font-size: 1.5rem;
+      margin: 0 0 16px;
+    }
+
+    h2 {
+      font-size: 1.1rem;
+      margin: 0 0 8px;
+    }
+
+    .tarjeta {
+      background: var(--tarjeta);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+
+    #formulario {
+      display: flex;
+      gap: 8px;
+    }
+
+    #nuevaTarea {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid var(--gris);
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    #formulario button {
+      background: var(--acento);
+      color: white;
+    }
+
+    .fila {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--gris);
+    }
+
+    .fila:last-child {
+      border-bottom: none;
+    }
+
+    .fila label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex: 1;
+    }
+
+    .fila input[type="checkbox"] {
+      width: 22px;
+      height: 22px;
+      accent-color: var(--verde);
+    }
+
+    .fila button {
+      background: transparent;
+      color: #999;
+    }
+
+    .progreso {
+      background: var(--gris);
+      border-radius: 999px;
+      height: 12px;
+      overflow: hidden;
+    }
+
+    .progreso>div {
+      background: var(--progreso);
+      height: 100%;
+      transition: width 0.3s;
+    }
+
+    #porcentaje {
+      font-size: 2rem;
+      margin: 8px 0 0;
+      color: var(--verde);
+    }
+
+    .dia {
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+    }
+
+    .dia .barra {
+      height: 8px;
+      background: var(--verde);
+      border-radius: 4px;
+      margin-top: 4px;
+    }
+
+    #comparacion {
+      font-size: 0.9rem;
+      margin: 12px 0 0;
+    }
+
+    .campoMeta {
+      display: block;
+      margin-top: 12px;
+      font-size: 0.9rem;
+    }
+
+    .campoMeta input {
+      width: 64px;
+      padding: 6px;
+      border: 1px solid var(--gris);
+      border-radius: 8px;
+    }
+
+    .logro {
+      padding: 8px 0;
+      color: #8a97a8;
+    }
+
+    .logro.ganado {
+      color: var(--texto);
+      font-weight: 600;
+    }
+
+    #imgMotivacion {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    #imgMotivacion[hidden] {
+      display: none;
+    }
+
+    #quitarImg {
+      display: block;
+      margin-top: 10px;
+      background: var(--gris);
+      color: var(--texto);
+    }
+
+    #quitarImg[hidden] {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Mi rutina de hoy</h1>
+
+  <div class="tarjeta">
+    <img id="imgMotivacion" alt="Imagen de motivación" hidden>
+    <p id="textoMotivacion"></p>
+    <input type="file" id="archivoImg" accept="image/*">
+    <button type="button" id="quitarImg" hidden>Quitar la imagen de hoy</button>
+  </div>
+
+  <div class="tarjeta">
+    <form id="formulario">
+      <input type="text" id="nuevaTarea" placeholder="Nueva tarea" required>
+      <button type="submit">Agregar</button>
+    </form>
+  </div>
+
+  <div class="tarjeta">
+    <div id="lista"></div>
+    <div class="progreso">
+      <div id="barraHoy"></div>
+    </div>
+    <h2 id="porcentaje">0%</h2>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Últimos 7 días</h2>
+    <div id="semana"></div>
+    <p id="comparacion"></p>
+  </div>
+  <div class="tarjeta">
+    <h2>Meta del mes</h2>
+    <p id="textoMeta"></p>
+    <div class="progreso">
+      <div id="barraMeta"></div>
+    </div>
+    <label class="campoMeta">Meta:
+      <input type="number" id="metaDias" min="1" max="31"> días con al menos 80%
+    </label>
+  </div>
+
+  <div class="tarjeta">
+    <h2>Logros</h2>
+    <p id="textoRacha"></p>
+    <div id="logros"></div>
+  </div>
+
+  <script>
+    const lista = document.getElementById('lista');
+    const formulario = document.getElementById('formulario');
+    const campo = document.getElementById('nuevaTarea');
+    const textoPorcentaje = document.getElementById('porcentaje');
+    const barraHoy = document.getElementById('barraHoy');
+    const semana = document.getElementById('semana');
+    const comparacion = document.getElementById('comparacion');
+    const textoMeta = document.getElementById('textoMeta');
+    const barraMeta = document.getElementById('barraMeta');
+    const metaInput = document.getElementById('metaDias');
+    const textoRacha = document.getElementById('textoRacha');
+    const logrosDiv = document.getElementById('logros');
+    const imgMotivacion = document.getElementById('imgMotivacion');
+    const textoMotivacion = document.getElementById('textoMotivacion');
+    const archivoImg = document.getElementById('archivoImg');
+    const quitarImg = document.getElementById('quitarImg');
+
+    // ---------- Fechas ----------
+    function dosDigitos(n) {
+      return String(n).padStart(2, '0');
+    }
+
+    function claveDe(fecha) {
+      return 'rutina-' + fecha.getFullYear() + '-'
+        + dosDigitos(fecha.getMonth() + 1) + '-'
+        + dosDigitos(fecha.getDate());
+    }
+
+    function diasAtras(n) {
+      const f = new Date();
+      f.setDate(f.getDate() - n);
+      return f;
+    }
+
+    const clave = claveDe(new Date());
+
+    // ---------- Datos ----------
+    let tareas = JSON.parse(localStorage.getItem('rutina-tareas')) || [
+      { id: 'ejercicio', nombre: 'Hacer ejercicio' },
+      { id: 'proyecto', nombre: 'Trabajar en el proyecto' },
+      { id: 'lectura', nombre: 'Leer 20 minutos' }
+    ];
+
+    // Lee un día guardado. Devuelve { total, marcadas } o null si no hay datos
+    function leerDia(fecha) {
+      const guardado = localStorage.getItem(claveDe(fecha));
+      if (!guardado) return null;
+      const d = JSON.parse(guardado);
+      if (d.marcadas) return d;                    // formato nuevo
+      return { total: tareas.length, marcadas: d }; // formato viejo (compatibilidad)
+    }
+
+    const diaHoy = leerDia(new Date());
+    let estado = diaHoy ? diaHoy.marcadas : {};
+
+    function guardar() {
+      localStorage.setItem('rutina-tareas', JSON.stringify(tareas));
+      localStorage.setItem(clave, JSON.stringify({
+        total: tareas.length,
+        marcadas: estado
+      }));
+    }
+
+    // ---------- Porcentajes ----------
+    function porcentajeDe(fecha) {
+      const d = leerDia(fecha);
+      if (!d || d.total === 0) return null;
+      const hechas = Object.values(d.marcadas).filter(v => v === true).length;
+      return Math.round((hechas / d.total) * 100);
+    }
+
+    function promedio(desde, hasta) {
+      const valores = [];
+      for (let i = desde; i <= hasta; i++) {
+        const p = porcentajeDe(diasAtras(i));
+        if (p !== null) valores.push(p);
+      }
+      if (valores.length === 0) return null;
+      const suma = valores.reduce((a, b) => a + b, 0);
+      return Math.round(suma / valores.length);
+    }
+
+    function dibujarSemana() {
+      semana.innerHTML = '';
+      for (let i = 6; i >= 0; i--) {
+        const fecha = diasAtras(i);
+        const p = porcentajeDe(fecha);
+        const nombreDia = fecha.toLocaleDateString('es-MX', { weekday: 'short', day: 'numeric' });
+
+        const fila = document.createElement('div');
+        fila.className = 'dia';
+        fila.textContent = nombreDia + ': ' + (p === null ? 'sin datos' : p + '%');
+
+        if (p !== null) {
+          const barra = document.createElement('div');
+          barra.className = 'barra';
+          barra.style.width = p + '%';
+          fila.appendChild(barra);
+        }
+        semana.appendChild(fila);
+      }
+
+      const estaSemana = promedio(0, 6);
+      const anterior = promedio(7, 13);
+
+      if (estaSemana === null) {
+        comparacion.textContent = 'Aún no hay datos esta semana.';
+      } else if (anterior === null) {
+        comparacion.textContent = 'Promedio de esta semana: ' + estaSemana + '%. Todavía no hay semana anterior para comparar.';
+      } else {
+        const dif = estaSemana - anterior;
+        const signo = dif > 0 ? '+' : '';
+        comparacion.textContent = 'Esta semana: ' + estaSemana + '% | Semana anterior: ' + anterior + '% | Cambio: ' + signo + dif + ' puntos';
+      }
+    }
+
+    function actualizarPorcentaje() {
+      const total = tareas.length;
+      const hechas = tareas.filter(t => estado[t.id]).length;
+      const p = total === 0 ? 0 : Math.round((hechas / total) * 100);
+      textoPorcentaje.textContent = p + '%';
+      barraHoy.style.width = p + '%';
+      dibujarSemana();
+      dibujarMeta();
+      dibujarLogros();
+    }
+    // ---------- Meta y logros ----------
+    const UMBRAL = 80; // % mínimo para contar un día como "cumplido"
+    let metaDias = Number(localStorage.getItem('rutina-meta')) || 20;
+    metaInput.value = metaDias;
+
+    metaInput.addEventListener('change', () => {
+      metaDias = Math.max(1, Number(metaInput.value) || 1);
+      localStorage.setItem('rutina-meta', metaDias);
+      actualizarPorcentaje();
+    });
+
+    function diasCumplidosDelMes() {
+      const hoy = new Date();
+      let cumplidos = 0;
+      for (let d = 1; d <= hoy.getDate(); d++) {
+        const fecha = new Date(hoy.getFullYear(), hoy.getMonth(), d);
+        const p = porcentajeDe(fecha);
+        if (p !== null && p >= UMBRAL) cumplidos++;
+      }
+      return cumplidos;
+    }
+
+    function calcularRacha() {
+      let racha = 0;
+      let i = 0;
+      // Si hoy todavía no llega al umbral, la racha se cuenta desde ayer
+      const pHoy = porcentajeDe(diasAtras(0));
+      if (pHoy === null || pHoy < UMBRAL) i = 1;
+
+      while (true) {
+        const p = porcentajeDe(diasAtras(i));
+        if (p === null || p < UMBRAL) break;
+        racha++;
+        i++;
+      }
+      return racha;
+    }
+
+    function hayDiaPerfecto() {
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (/^rutina-\d{4}-\d{2}-\d{2}$/.test(k)) {
+          const fecha = new Date(k.slice(7) + 'T00:00:00');
+          if (porcentajeDe(fecha) === 100) return true;
+        }
+      }
+      return false;
+    }
+
+    function dibujarMeta() {
+      const cumplidos = diasCumplidosDelMes();
+      const p = Math.min(100, Math.round((cumplidos / metaDias) * 100));
+      textoMeta.textContent = cumplidos + ' de ' + metaDias + ' días cumplidos este mes';
+      barraMeta.style.width = p + '%';
+    }
+
+    function dibujarLogros() {
+      const racha = calcularRacha();
+      const cumplidos = diasCumplidosDelMes();
+      textoRacha.textContent = 'Racha actual: ' + racha + (racha === 1 ? ' día' : ' días');
+
+      const ganados = JSON.parse(localStorage.getItem('rutina-logros')) || {};
+
+      const logros = [
+        { id: 'perfecto', nombre: 'Primer día perfecto', cumplido: hayDiaPerfecto() },
+        { id: 'racha3', nombre: 'Racha de 3 días', cumplido: racha >= 3 },
+        { id: 'racha7', nombre: 'Racha de 7 días', cumplido: racha >= 7 },
+        { id: 'meta', nombre: 'Meta del mes cumplida', cumplido: cumplidos >= metaDias }
+      ];
+
+      logrosDiv.innerHTML = '';
+      logros.forEach(l => {
+        // Si se cumplió ahora y no estaba guardado, lo guardamos con la fecha de hoy
+        if (l.cumplido && !ganados[l.id]) {
+          ganados[l.id] = claveDe(new Date()).slice(7);
+          localStorage.setItem('rutina-logros', JSON.stringify(ganados));
+        }
+
+        const fecha = ganados[l.id];
+        const el = document.createElement('div');
+        el.className = 'logro' + (fecha ? ' ganado' : '');
+        el.textContent = (fecha ? '🏆 ' : '🔒 ') + l.nombre + (fecha ? ' (' + fecha + ')' : '');
+        logrosDiv.appendChild(el);
+      });
+    }
+
+    // ---------- Imágenes de motivación ----------
+    let imagenes = JSON.parse(localStorage.getItem('rutina-imagenes')) || [];
+
+    function guardarImagenes() {
+      localStorage.setItem('rutina-imagenes', JSON.stringify(imagenes));
+    }
+
+    function dibujarImagen() {
+      if (imagenes.length === 0) {
+        imgMotivacion.hidden = true;
+        quitarImg.hidden = true;
+        textoMotivacion.textContent = 'Agrega una imagen que te motive.';
+        return;
+      }
+      const indice = new Date().getDate() % imagenes.length;
+      imgMotivacion.src = imagenes[indice];
+      imgMotivacion.hidden = false;
+      quitarImg.hidden = false;
+      textoMotivacion.textContent = 'Imágenes guardadas: ' + imagenes.length;
+    }
+
+    // Reduce la imagen a máximo 600px de ancho para que no llene el almacenamiento
+    function reducir(archivo, alTerminar) {
+      const lector = new FileReader();
+      lector.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const ancho = Math.min(600, img.width);
+          const alto = img.height * (ancho / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = ancho;
+          canvas.height = alto;
+          canvas.getContext('2d').drawImage(img, 0, 0, ancho, alto);
+          alTerminar(canvas.toDataURL('image/jpeg', 0.7));
+        };
+        img.src = lector.result;
+      };
+      lector.readAsDataURL(archivo);
+    }
+
+    archivoImg.addEventListener('change', () => {
+      const archivo = archivoImg.files[0];
+      if (!archivo) return;
+      reducir(archivo, datos => {
+        imagenes.push(datos);
+        try {
+          guardarImagenes();
+        } catch (e) {
+          imagenes.pop();
+          alert('No hay espacio para guardar más imágenes.');
+        }
+        archivoImg.value = '';
+        dibujarImagen();
+      });
+    });
+
+    quitarImg.addEventListener('click', () => {
+      const indice = new Date().getDate() % imagenes.length;
+      imagenes.splice(indice, 1);
+      guardarImagenes();
+      dibujarImagen();
+    });
+
+    // ---------- Pantalla ----------
+    function dibujar() {
+      lista.innerHTML = '';
+      tareas.forEach(t => {
+        const fila = document.createElement('div');
+        fila.className = 'fila';
+
+        const etiqueta = document.createElement('label');
+        const casilla = document.createElement('input');
+        casilla.type = 'checkbox';
+        casilla.checked = estado[t.id] === true;
+
+        casilla.addEventListener('change', () => {
+          estado[t.id] = casilla.checked;
+          guardar();
+          actualizarPorcentaje();
+        });
+
+        const borrar = document.createElement('button');
+        borrar.textContent = '✕';
+        borrar.addEventListener('click', () => {
+          tareas = tareas.filter(x => x.id !== t.id);
+          delete estado[t.id];
+          guardar();
+          dibujar();
+        });
+
+        etiqueta.append(casilla, t.nombre);
+        fila.append(etiqueta, borrar);
+        lista.appendChild(fila);
+      });
+      actualizarPorcentaje();
+    }
+
+    formulario.addEventListener('submit', e => {
+      e.preventDefault();
+      const nombre = campo.value.trim();
+      if (!nombre) return;
+      tareas.push({ id: String(Date.now()), nombre: nombre });
+      campo.value = '';
+      guardar();
+      dibujar();
+      dibujarImagen();
+      dibujar();
+    });
+
+    dibujar();
+
+    if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js');
+}
+  </script>
+</body>
+
+</html>
