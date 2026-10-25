@@ -4,8 +4,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Mi rutina</title>
-  <link rel="manifest" href="manifest.json">  
+  <title>RutinaMNGT</title>
+  <meta name="apple-mobile-web-app-title" content="RutinaMNGT">
+  <link rel="manifest" href="manifest.json">
   <meta name="theme-color" content="#1e6fd9">
   <link rel="apple-touch-icon" href="icon-192.png">
   <style>
@@ -13,10 +14,21 @@
       --acento: #1e6fd9;
       --verde: seagreen;
       --fondo: #eef4fc;
-      --tarjeta: #ffffff;
+      --tarjeta: rgba(255, 255, 255, 0.75);
+      --panel: #ffffff;
       --texto: #12263f;
       --gris: #d9e4f2;
       --progreso: #d400b8;
+      --suave: #8a97a8;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    /* Sin esta regla, un display definido en CSS anula el atributo hidden */
+    [hidden] {
+      display: none !important;
     }
 
     body {
@@ -28,9 +40,21 @@
       padding: 16px;
     }
 
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background: url('fondo.jpg') center / cover no-repeat;
+    }
+
+    body.panel-abierto {
+      overflow: hidden;
+    }
+
     h1 {
       font-size: 1.5rem;
-      margin: 0 0 16px;
+      margin: 0;
     }
 
     h2 {
@@ -38,6 +62,38 @@
       margin: 0 0 8px;
     }
 
+    button {
+      border: none;
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    /* ---------- Barra superior ---------- */
+    .barra-sup {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 4px;
+    }
+
+    #btnMenu {
+      background: var(--acento);
+      color: white;
+      width: 44px;
+      height: 44px;
+      padding: 0;
+      font-size: 1.4rem;
+    }
+
+    #fechaHoy {
+      margin: 0 0 16px 56px;
+      font-size: 0.9rem;
+      color: #000000;
+    }
+
+    /* ---------- Tarjetas ---------- */
     .tarjeta {
       background: var(--tarjeta);
       border-radius: 12px;
@@ -53,18 +109,11 @@
 
     #nuevaTarea {
       flex: 1;
+      min-width: 0;
       padding: 10px;
       border: 1px solid var(--gris);
       border-radius: 8px;
       font-size: 1rem;
-    }
-
-    button {
-      border: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      font-size: 1rem;
-      cursor: pointer;
     }
 
     #formulario button {
@@ -102,11 +151,17 @@
       color: #999;
     }
 
+    .vacio {
+      color: var(--suave);
+      margin: 0;
+    }
+
     .progreso {
       background: var(--gris);
       border-radius: 999px;
       height: 12px;
       overflow: hidden;
+      margin-top: 12px;
     }
 
     .progreso>div {
@@ -115,12 +170,141 @@
       transition: width 0.3s;
     }
 
+    #barraHoy {
+      background: linear-gradient(90deg,
+          #ffffff 0%, rgb(130, 255, 249) 25%,
+          var(--acento) 50%, var(--acento) 75%,
+          #d400b8 90%);
+      background-repeat: no-repeat;
+      transition: width 0.3s, background-size 0.3s;
+    }
+
     #porcentaje {
       font-size: 2rem;
       margin: 8px 0 0;
       color: var(--verde);
     }
 
+    #imgMotivacion {
+      width: 100%;
+      border-radius: 8px;
+      display: block;
+    }
+
+    /* ---------- Panel lateral ---------- */
+    #fondoPanel {
+      position: fixed;
+      inset: 0;
+      background: rgba(18, 38, 63, 0.5);
+      z-index: 10;
+    }
+
+    #panel {
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      width: min(340px, 88vw);
+      background: var(--panel);
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+      transform: translateX(-100%);
+      visibility: hidden;
+      transition: transform 0.3s ease, visibility 0s 0.3s;
+      box-shadow: 2px 0 12px rgba(0, 0, 0, 0.25);
+    }
+
+    #panel.abierto {
+      transform: none;
+      visibility: visible;
+      transition: transform 0.3s ease;
+    }
+
+    .panel-cabecera {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 12px;
+      background: var(--acento);
+      color: white;
+    }
+
+    .panel-cabecera h2 {
+      flex: 1;
+      margin: 0;
+    }
+
+    .panel-cabecera button {
+      background: transparent;
+      color: white;
+      padding: 8px 10px;
+      font-size: 1.1rem;
+    }
+
+    .panel-cuerpo {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+    }
+
+    .opcion {
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: var(--fondo);
+      color: var(--texto);
+      padding: 14px;
+      margin-bottom: 8px;
+      border-radius: 10px;
+    }
+
+    .btn {
+      background: var(--acento);
+      color: white;
+      display: inline-block;
+    }
+
+    .btn-sec {
+      background: var(--gris);
+      color: var(--texto);
+    }
+
+    label.btn {
+      border-radius: 8px;
+      padding: 10px 14px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .acciones {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0;
+    }
+
+    .nota {
+      font-size: 0.85rem;
+      color: var(--suave);
+      margin: 8px 0;
+    }
+
+    #mensaje {
+      font-size: 0.9rem;
+      min-height: 1.2em;
+      margin: 8px 0 0;
+    }
+
+    #mensaje.error {
+      color: #c0392b;
+    }
+
+    #mensaje.ok {
+      color: var(--verde);
+    }
+
+    /* ---------- Contenido de las vistas ---------- */
     .dia {
       margin-bottom: 10px;
       font-size: 0.9rem;
@@ -153,47 +337,24 @@
 
     .logro {
       padding: 8px 0;
-      color: #8a97a8;
+      color: var(--suave);
     }
 
     .logro.ganado {
       color: var(--texto);
       font-weight: 600;
     }
-
-    #imgMotivacion {
-      width: 100%;
-      border-radius: 8px;
-      display: block;
-      margin-bottom: 8px;
-    }
-
-    #imgMotivacion[hidden] {
-      display: none;
-    }
-
-    #quitarImg {
-      display: block;
-      margin-top: 10px;
-      background: var(--gris);
-      color: var(--texto);
-    }
-
-    #quitarImg[hidden] {
-      display: none;
-    }
   </style>
 </head>
 
 <body>
-  <h1>Mi rutina de hoy</h1>
 
-  <div class="tarjeta">
-    <img id="imgMotivacion" alt="Imagen de motivación" hidden>
-    <p id="textoMotivacion"></p>
-    <input type="file" id="archivoImg" accept="image/*">
-    <button type="button" id="quitarImg" hidden>Quitar la imagen de hoy</button>
+  <!-- ===== Página principal: solo tareas de hoy ===== -->
+  <div class="barra-sup">
+    <button id="btnMenu" type="button" aria-label="Abrir menú" aria-expanded="false" aria-controls="panel">☰</button>
+    <h1>Mi rutina de hoy</h1>
   </div>
+  <p id="fechaHoy"></p>
 
   <div class="tarjeta">
     <form id="formulario">
@@ -209,48 +370,82 @@
     </div>
     <h2 id="porcentaje">0%</h2>
   </div>
-
-  <div class="tarjeta">
-    <h2>Últimos 7 días</h2>
-    <div id="semana"></div>
-    <p id="comparacion"></p>
+  <div class="tarjeta" id="tarjetaImagen" hidden>
+    <img id="imgMotivacion" alt="Imagen de motivación">
   </div>
-  <div class="tarjeta">
-    <h2>Meta del mes</h2>
-    <p id="textoMeta"></p>
-    <div class="progreso">
-      <div id="barraMeta"></div>
+
+  <!-- ===== Panel lateral ===== -->
+  <div id="fondoPanel" hidden></div>
+
+  <aside id="panel" aria-hidden="true" aria-label="Menú de opciones">
+    <div class="panel-cabecera">
+      <button id="btnVolver" type="button" aria-label="Volver al menú" hidden>←</button>
+      <h2 id="tituloPanel">Menú</h2>
+      <button id="btnCerrar" type="button" aria-label="Cerrar menú">✕</button>
     </div>
-    <label class="campoMeta">Meta:
-      <input type="number" id="metaDias" min="1" max="31"> días con al menos 80%
-    </label>
-  </div>
 
-  <div class="tarjeta">
-    <h2>Logros</h2>
-    <p id="textoRacha"></p>
-    <div id="logros"></div>
-  </div>
+    <div class="panel-cuerpo">
+
+      <nav id="menuOpciones">
+        <button type="button" class="opcion" data-vista="historial">📅 Historial semanal</button>
+        <button type="button" class="opcion" data-vista="meta">🎯 Meta del mes</button>
+        <button type="button" class="opcion" data-vista="logros">🏆 Logros</button>
+        <button type="button" class="opcion" data-vista="imagen">🖼️ Imagen de motivación</button>
+        <button type="button" class="opcion" data-vista="respaldo">💾 Respaldo</button>
+      </nav>
+
+      <section class="vista" id="vista-historial" data-titulo="Historial semanal" hidden>
+        <div id="semana"></div>
+        <p id="comparacion"></p>
+      </section>
+
+      <section class="vista" id="vista-meta" data-titulo="Meta del mes" hidden>
+        <p id="textoMeta"></p>
+        <div class="progreso">
+          <div id="barraMeta"></div>
+        </div>
+        <label class="campoMeta">Meta:
+          <input type="number" id="metaDias" min="1" max="31"> días con al menos 80%
+        </label>
+      </section>
+
+      <section class="vista" id="vista-logros" data-titulo="Logros" hidden>
+        <p id="textoRacha"></p>
+        <div id="logros"></div>
+      </section>
+
+      <section class="vista" id="vista-imagen" data-titulo="Imagen de motivación" hidden>
+        <p id="textoMotivacion"></p>
+        <div class="acciones">
+          <label class="btn" for="archivoImg">Elegir imagen</label>
+          <input type="file" id="archivoImg" accept="image/*" hidden>
+          <button type="button" id="quitarImg" class="btn-sec">Quitar la de hoy</button>
+        </div>
+        <p class="nota">Se muestra una imagen distinta cada día, en orden.</p>
+      </section>
+
+      <section class="vista" id="vista-respaldo" data-titulo="Respaldo" hidden>
+        <p>Tus datos viven solo en este dispositivo. Guarda un respaldo antes de cambiar de teléfono o de borrar los
+          datos del navegador.</p>
+        <div class="acciones">
+          <button type="button" id="btnExportar" class="btn">Exportar respaldo</button>
+          <label class="btn btn-sec" for="archivoImportar">Importar respaldo</label>
+          <input type="file" id="archivoImportar" accept=".json,application/json" hidden>
+        </div>
+        <p class="nota" id="ultimoRespaldo"></p>
+        <p class="nota">Importar reemplaza los datos actuales por los del archivo.</p>
+        <p id="mensaje" role="status"></p>
+      </section>
+
+    </div>
+  </aside>
 
   <script>
-    const lista = document.getElementById('lista');
-    const formulario = document.getElementById('formulario');
-    const campo = document.getElementById('nuevaTarea');
-    const textoPorcentaje = document.getElementById('porcentaje');
-    const barraHoy = document.getElementById('barraHoy');
-    const semana = document.getElementById('semana');
-    const comparacion = document.getElementById('comparacion');
-    const textoMeta = document.getElementById('textoMeta');
-    const barraMeta = document.getElementById('barraMeta');
-    const metaInput = document.getElementById('metaDias');
-    const textoRacha = document.getElementById('textoRacha');
-    const logrosDiv = document.getElementById('logros');
-    const imgMotivacion = document.getElementById('imgMotivacion');
-    const textoMotivacion = document.getElementById('textoMotivacion');
-    const archivoImg = document.getElementById('archivoImg');
-    const quitarImg = document.getElementById('quitarImg');
+    const $ = id => document.getElementById(id);
 
-    // ---------- Fechas ----------
+    // =========================================================
+    // Fechas
+    // =========================================================
     function dosDigitos(n) {
       return String(n).padStart(2, '0');
     }
@@ -261,42 +456,68 @@
         + dosDigitos(fecha.getDate());
     }
 
+    function claveHoy() {
+      return claveDe(new Date());
+    }
+
     function diasAtras(n) {
       const f = new Date();
       f.setDate(f.getDate() - n);
       return f;
     }
 
-    const clave = claveDe(new Date());
+    // =========================================================
+    // Datos
+    // =========================================================
+    // Lee un valor guardado; si no existe o está dañado, devuelve el valor por defecto
+    function leerJSON(clave, defecto) {
+      try {
+        const v = localStorage.getItem(clave);
+        return v ? JSON.parse(v) : defecto;
+      } catch (e) {
+        return defecto;
+      }
+    }
 
-    // ---------- Datos ----------
-    let tareas = JSON.parse(localStorage.getItem('rutina-tareas')) || [
+    let tareas = leerJSON('rutina-tareas', [
       { id: 'ejercicio', nombre: 'Hacer ejercicio' },
       { id: 'proyecto', nombre: 'Trabajar en el proyecto' },
       { id: 'lectura', nombre: 'Leer 20 minutos' }
-    ];
+    ]);
 
-    // Lee un día guardado. Devuelve { total, marcadas } o null si no hay datos
+    // Devuelve { total, marcadas } o null si ese día no hay datos
     function leerDia(fecha) {
-      const guardado = localStorage.getItem(claveDe(fecha));
-      if (!guardado) return null;
-      const d = JSON.parse(guardado);
-      if (d.marcadas) return d;                    // formato nuevo
-      return { total: tareas.length, marcadas: d }; // formato viejo (compatibilidad)
+      const d = leerJSON(claveDe(fecha), null);
+      if (!d) return null;
+      if (d.marcadas) return d;                      // formato nuevo
+      return { total: tareas.length, marcadas: d };  // formato viejo
     }
 
-    const diaHoy = leerDia(new Date());
-    let estado = diaHoy ? diaHoy.marcadas : {};
+    let diaActual = claveHoy();
+    let estado = (leerDia(new Date()) || { marcadas: {} }).marcadas;
 
     function guardar() {
       localStorage.setItem('rutina-tareas', JSON.stringify(tareas));
-      localStorage.setItem(clave, JSON.stringify({
+      localStorage.setItem(claveHoy(), JSON.stringify({
         total: tareas.length,
         marcadas: estado
       }));
     }
 
-    // ---------- Porcentajes ----------
+    // Si la app se quedó abierta y ya cambió el día, recarga el estado de hoy
+    function revisarCambioDeDia() {
+      if (claveHoy() === diaActual) return;
+      diaActual = claveHoy();
+      estado = (leerDia(new Date()) || { marcadas: {} }).marcadas;
+      dibujarFecha();
+      dibujarImagen();
+      dibujarTareas();
+      refrescarTodo();
+    }
+
+    // =========================================================
+    // Porcentajes
+    // =========================================================
     function porcentajeDe(fecha) {
       const d = leerDia(fecha);
       if (!d || d.total === 0) return null;
@@ -315,7 +536,87 @@
       return Math.round(suma / valores.length);
     }
 
+    // =========================================================
+    // Página principal: tareas de hoy
+    // =========================================================
+    function dibujarFecha() {
+      const texto = new Date().toLocaleDateString('es-MX', {
+        weekday: 'long', day: 'numeric', month: 'long'
+      });
+      $('fechaHoy').textContent = texto.charAt(0).toUpperCase() + texto.slice(1);
+    }
+
+    function actualizarHoy() {
+      const total = tareas.length;
+      const hechas = tareas.filter(t => estado[t.id]).length;
+      const p = total === 0 ? 0 : Math.round((hechas / total) * 100);
+      $('porcentaje').textContent = p + '%';
+      $('barraHoy').style.width = p + '%';
+      $('barraHoy').style.backgroundSize = (p > 0 ? 10000 / p : 100) + '% 100%';
+    }
+
+    function dibujarTareas() {
+      const lista = $('lista');
+      lista.innerHTML = '';
+
+      if (tareas.length === 0) {
+        const vacio = document.createElement('p');
+        vacio.className = 'vacio';
+        vacio.textContent = 'No tienes tareas. Agrega la primera arriba.';
+        lista.appendChild(vacio);
+      }
+
+      tareas.forEach(t => {
+        const fila = document.createElement('div');
+        fila.className = 'fila';
+
+        const etiqueta = document.createElement('label');
+        const casilla = document.createElement('input');
+        casilla.type = 'checkbox';
+        casilla.checked = estado[t.id] === true;
+
+        casilla.addEventListener('change', () => {
+          revisarCambioDeDia();
+          estado[t.id] = casilla.checked;
+          guardar();
+          refrescarTodo();
+        });
+
+        const borrar = document.createElement('button');
+        borrar.type = 'button';
+        borrar.textContent = '✕';
+        borrar.setAttribute('aria-label', 'Borrar tarea ' + t.nombre);
+        borrar.addEventListener('click', () => {
+          tareas = tareas.filter(x => x.id !== t.id);
+          delete estado[t.id];
+          guardar();
+          dibujarTareas();
+          refrescarTodo();
+        });
+
+        etiqueta.append(casilla, t.nombre);
+        fila.append(etiqueta, borrar);
+        lista.appendChild(fila);
+      });
+      actualizarHoy();
+    }
+
+    $('formulario').addEventListener('submit', e => {
+      e.preventDefault();
+      const nombre = $('nuevaTarea').value.trim();
+      if (!nombre) return;
+      tareas.push({ id: String(Date.now()), nombre: nombre });
+      $('nuevaTarea').value = '';
+      guardar();
+      dibujarTareas();
+      refrescarTodo();
+    });
+
+    // =========================================================
+    // Historial semanal
+    // =========================================================
     function dibujarSemana() {
+      const semana = $('semana');
       semana.innerHTML = '';
       for (let i = 6; i >= 0; i--) {
         const fecha = diasAtras(i);
@@ -337,6 +638,7 @@
 
       const estaSemana = promedio(0, 6);
       const anterior = promedio(7, 13);
+      const comparacion = $('comparacion');
 
       if (estaSemana === null) {
         comparacion.textContent = 'Aún no hay datos esta semana.';
@@ -349,25 +651,17 @@
       }
     }
 
-    function actualizarPorcentaje() {
-      const total = tareas.length;
-      const hechas = tareas.filter(t => estado[t.id]).length;
-      const p = total === 0 ? 0 : Math.round((hechas / total) * 100);
-      textoPorcentaje.textContent = p + '%';
-      barraHoy.style.width = p + '%';
-      dibujarSemana();
-      dibujarMeta();
-      dibujarLogros();
-    }
-    // ---------- Meta y logros ----------
+    // =========================================================
+    // Meta del mes y logros
+    // =========================================================
     const UMBRAL = 80; // % mínimo para contar un día como "cumplido"
     let metaDias = Number(localStorage.getItem('rutina-meta')) || 20;
-    metaInput.value = metaDias;
+    $('metaDias').value = metaDias;
 
-    metaInput.addEventListener('change', () => {
-      metaDias = Math.max(1, Number(metaInput.value) || 1);
+    $('metaDias').addEventListener('change', () => {
+      metaDias = Math.max(1, Number($('metaDias').value) || 1);
       localStorage.setItem('rutina-meta', metaDias);
-      actualizarPorcentaje();
+      refrescarTodo();
     });
 
     function diasCumplidosDelMes() {
@@ -411,16 +705,16 @@
     function dibujarMeta() {
       const cumplidos = diasCumplidosDelMes();
       const p = Math.min(100, Math.round((cumplidos / metaDias) * 100));
-      textoMeta.textContent = cumplidos + ' de ' + metaDias + ' días cumplidos este mes';
-      barraMeta.style.width = p + '%';
+      $('textoMeta').textContent = cumplidos + ' de ' + metaDias + ' días cumplidos este mes';
+      $('barraMeta').style.width = p + '%';
     }
 
     function dibujarLogros() {
       const racha = calcularRacha();
       const cumplidos = diasCumplidosDelMes();
-      textoRacha.textContent = 'Racha actual: ' + racha + (racha === 1 ? ' día' : ' días');
+      $('textoRacha').textContent = 'Racha actual: ' + racha + (racha === 1 ? ' día' : ' días');
 
-      const ganados = JSON.parse(localStorage.getItem('rutina-logros')) || {};
+      const ganados = leerJSON('rutina-logros', {});
 
       const logros = [
         { id: 'perfecto', nombre: 'Primer día perfecto', cumplido: hayDiaPerfecto() },
@@ -429,11 +723,12 @@
         { id: 'meta', nombre: 'Meta del mes cumplida', cumplido: cumplidos >= metaDias }
       ];
 
+      const logrosDiv = $('logros');
       logrosDiv.innerHTML = '';
       logros.forEach(l => {
-        // Si se cumplió ahora y no estaba guardado, lo guardamos con la fecha de hoy
+        // Si se cumple y aún no está guardado, se guarda con la fecha de hoy
         if (l.cumplido && !ganados[l.id]) {
-          ganados[l.id] = claveDe(new Date()).slice(7);
+          ganados[l.id] = claveHoy().slice(7);
           localStorage.setItem('rutina-logros', JSON.stringify(ganados));
         }
 
@@ -445,8 +740,10 @@
       });
     }
 
-    // ---------- Imágenes de motivación ----------
-    let imagenes = JSON.parse(localStorage.getItem('rutina-imagenes')) || [];
+    // =========================================================
+    // Imágenes de motivación
+    // =========================================================
+    let imagenes = leerJSON('rutina-imagenes', []);
 
     function guardarImagenes() {
       localStorage.setItem('rutina-imagenes', JSON.stringify(imagenes));
@@ -454,19 +751,19 @@
 
     function dibujarImagen() {
       if (imagenes.length === 0) {
-        imgMotivacion.hidden = true;
-        quitarImg.hidden = true;
-        textoMotivacion.textContent = 'Agrega una imagen que te motive.';
+        $('tarjetaImagen').hidden = true;
+        $('quitarImg').hidden = true;
+        $('textoMotivacion').textContent = 'Agrega una imagen que te motive.';
         return;
       }
       const indice = new Date().getDate() % imagenes.length;
-      imgMotivacion.src = imagenes[indice];
-      imgMotivacion.hidden = false;
-      quitarImg.hidden = false;
-      textoMotivacion.textContent = 'Imágenes guardadas: ' + imagenes.length;
+      $('imgMotivacion').src = imagenes[indice];
+      $('tarjetaImagen').hidden = false;
+      $('quitarImg').hidden = false;
+      $('textoMotivacion').textContent = 'Imágenes guardadas: ' + imagenes.length;
     }
 
-    // Reduce la imagen a máximo 600px de ancho para que no llene el almacenamiento
+    // Reduce la imagen a máximo 600px de ancho para no llenar el almacenamiento
     function reducir(archivo, alTerminar) {
       const lector = new FileReader();
       lector.onload = () => {
@@ -485,8 +782,8 @@
       lector.readAsDataURL(archivo);
     }
 
-    archivoImg.addEventListener('change', () => {
-      const archivo = archivoImg.files[0];
+    $('archivoImg').addEventListener('change', () => {
+      const archivo = $('archivoImg').files[0];
       if (!archivo) return;
       reducir(archivo, datos => {
         imagenes.push(datos);
@@ -496,69 +793,195 @@
           imagenes.pop();
           alert('No hay espacio para guardar más imágenes.');
         }
-        archivoImg.value = '';
+        $('archivoImg').value = '';
         dibujarImagen();
       });
     });
 
-    quitarImg.addEventListener('click', () => {
+    $('quitarImg').addEventListener('click', () => {
+      if (imagenes.length === 0) return;
       const indice = new Date().getDate() % imagenes.length;
       imagenes.splice(indice, 1);
       guardarImagenes();
       dibujarImagen();
     });
 
-    // ---------- Pantalla ----------
-    function dibujar() {
-      lista.innerHTML = '';
-      tareas.forEach(t => {
-        const fila = document.createElement('div');
-        fila.className = 'fila';
+    // =========================================================
+    // Respaldo
+    // =========================================================
+    // Solo estas claves forman parte del respaldo (y solo estas se aceptan al importar)
+    const PATRON_CLAVES = /^rutina-(tareas|meta|logros|imagenes|\d{4}-\d{2}-\d{2})$/;
 
-        const etiqueta = document.createElement('label');
-        const casilla = document.createElement('input');
-        casilla.type = 'checkbox';
-        casilla.checked = estado[t.id] === true;
-
-        casilla.addEventListener('change', () => {
-          estado[t.id] = casilla.checked;
-          guardar();
-          actualizarPorcentaje();
-        });
-
-        const borrar = document.createElement('button');
-        borrar.textContent = '✕';
-        borrar.addEventListener('click', () => {
-          tareas = tareas.filter(x => x.id !== t.id);
-          delete estado[t.id];
-          guardar();
-          dibujar();
-        });
-
-        etiqueta.append(casilla, t.nombre);
-        fila.append(etiqueta, borrar);
-        lista.appendChild(fila);
-      });
-      actualizarPorcentaje();
+    function mostrarMensaje(texto, tipo) {
+      const m = $('mensaje');
+      m.textContent = texto;
+      m.className = tipo || '';
     }
 
-    formulario.addEventListener('submit', e => {
-      e.preventDefault();
-      const nombre = campo.value.trim();
-      if (!nombre) return;
-      tareas.push({ id: String(Date.now()), nombre: nombre });
-      campo.value = '';
-      guardar();
-      dibujar();
-      dibujarImagen();
-      dibujar();
+    function dibujarRespaldo() {
+      const ultimo = localStorage.getItem('respaldo-ultimo');
+      $('ultimoRespaldo').textContent = ultimo
+        ? 'Último respaldo: ' + new Date(ultimo).toLocaleDateString('es-MX', { dateStyle: 'long' })
+        : 'Todavía no has hecho ningún respaldo.';
+    }
+
+    $('btnExportar').addEventListener('click', () => {
+      const datos = {};
+      for (let i = 0; i < localStorage.length; i++) {
+        const k = localStorage.key(i);
+        if (PATRON_CLAVES.test(k)) datos[k] = localStorage.getItem(k);
+      }
+      const paquete = {
+        app: 'rutina',
+        version: 1,
+        creado: new Date().toISOString(),
+        datos: datos
+      };
+
+      const blob = new Blob([JSON.stringify(paquete)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement('a');
+      enlace.href = url;
+      enlace.download = 'rutina-respaldo-' + claveHoy().slice(7) + '.json';
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      localStorage.setItem('respaldo-ultimo', new Date().toISOString());
+      dibujarRespaldo();
+      mostrarMensaje('Respaldo exportado (' + Object.keys(datos).length + ' registros).', 'ok');
     });
 
-    dibujar();
+    $('archivoImportar').addEventListener('change', () => {
+      const archivo = $('archivoImportar').files[0];
+      if (!archivo) return;
+
+      const lector = new FileReader();
+      lector.onload = () => {
+        try {
+          const paquete = JSON.parse(lector.result);
+          if (!paquete || paquete.app !== 'rutina' || typeof paquete.datos !== 'object' || paquete.datos === null) {
+            throw new Error('formato');
+          }
+
+          const entradas = Object.entries(paquete.datos)
+            .filter(([k, v]) => PATRON_CLAVES.test(k) && typeof v === 'string');
+          if (entradas.length === 0) throw new Error('vacío');
+          entradas.forEach(([k, v]) => JSON.parse(v)); // cada valor debe ser JSON válido
+
+          const dias = entradas.filter(([k]) => /\d{4}-\d{2}-\d{2}$/.test(k)).length;
+          if (!confirm('Se reemplazarán los datos actuales por los del respaldo (' + dias + ' días registrados). ¿Continuar?')) {
+            mostrarMensaje('Importación cancelada.');
+            return;
+          }
+
+          // Guarda una copia de lo actual por si algo falla a la mitad
+          const anteriores = [];
+          for (let i = 0; i < localStorage.length; i++) {
+            const k = localStorage.key(i);
+            if (PATRON_CLAVES.test(k)) anteriores.push([k, localStorage.getItem(k)]);
+          }
+          anteriores.forEach(([k]) => localStorage.removeItem(k));
+
+          try {
+            entradas.forEach(([k, v]) => localStorage.setItem(k, v));
+          } catch (e) {
+            entradas.forEach(([k]) => localStorage.removeItem(k));
+            anteriores.forEach(([k, v]) => localStorage.setItem(k, v));
+            mostrarMensaje('No hay espacio suficiente. No se cambió nada.', 'error');
+            return;
+          }
+          location.reload();
+        } catch (e) {
+          mostrarMensaje('Ese archivo no es un respaldo válido de esta app.', 'error');
+        }
+      };
+      lector.readAsText(archivo);
+      $('archivoImportar').value = '';
+    });
+
+    // =========================================================
+    // Panel lateral
+    // =========================================================
+    const panel = $('panel');
+
+    function mostrarMenu() {
+      document.querySelectorAll('.vista').forEach(v => v.hidden = true);
+      $('menuOpciones').hidden = false;
+      $('btnVolver').hidden = true;
+      $('tituloPanel').textContent = 'Menú';
+      panel.querySelector('.panel-cuerpo').scrollTop = 0;
+    }
+
+    function mostrarVista(nombre) {
+      refrescarTodo();
+      document.querySelectorAll('.vista').forEach(v => v.hidden = true);
+      const vista = $('vista-' + nombre);
+      vista.hidden = false;
+      $('menuOpciones').hidden = true;
+      $('btnVolver').hidden = false;
+      $('tituloPanel').textContent = vista.dataset.titulo;
+      mostrarMensaje('');
+      panel.querySelector('.panel-cuerpo').scrollTop = 0;
+    }
+
+    function abrirPanel() {
+      mostrarMenu();
+      panel.classList.add('abierto');
+      panel.setAttribute('aria-hidden', 'false');
+      $('fondoPanel').hidden = false;
+      $('btnMenu').setAttribute('aria-expanded', 'true');
+      document.body.classList.add('panel-abierto');
+      $('btnCerrar').focus();
+    }
+
+    function cerrarPanel() {
+      panel.classList.remove('abierto');
+      panel.setAttribute('aria-hidden', 'true');
+      $('fondoPanel').hidden = true;
+      $('btnMenu').setAttribute('aria-expanded', 'false');
+      document.body.classList.remove('panel-abierto');
+      $('btnMenu').focus();
+    }
+
+    $('btnMenu').addEventListener('click', abrirPanel);
+    $('btnCerrar').addEventListener('click', cerrarPanel);
+    $('fondoPanel').addEventListener('click', cerrarPanel);
+    $('btnVolver').addEventListener('click', mostrarMenu);
+
+    document.querySelectorAll('.opcion').forEach(b => {
+      b.addEventListener('click', () => mostrarVista(b.dataset.vista));
+    });
+
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && panel.classList.contains('abierto')) cerrarPanel();
+    });
+
+    // =========================================================
+    // Arranque
+    // =========================================================
+    function refrescarTodo() {
+      actualizarHoy();
+      dibujarSemana();
+      dibujarMeta();
+      dibujarLogros();
+      dibujarRespaldo();
+    }
+
+    document.addEventListener('visibilitychange', () => {
+      if (!document.hidden) revisarCambioDeDia();
+    });
+    setInterval(revisarCambioDeDia, 60000);
+
+    dibujarFecha();
+    dibujarImagen();
+    dibujarTareas();
+    refrescarTodo();
 
     if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js');
-}
+      navigator.serviceWorker.register('./sw.js');
+    }
   </script>
 </body>
 

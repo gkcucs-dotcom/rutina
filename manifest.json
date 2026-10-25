@@ -1,6 +1,6 @@
 {
-  "name": "Mi rutina",
-  "short_name": "Rutina",
+  "name": "RutinaMNGT",
+  "short_name": "RutinaMNGT",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
